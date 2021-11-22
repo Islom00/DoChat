@@ -57,8 +57,11 @@
             <div class="row justify-content-center mt-5">
                 <div class="col-md-8 col-sm-12 border-bottom">
                     <h1><a href="{% url 'social:post-detail' post.pk %}">{{ post.title }}</a></h1>
+                    {% if post.content %}
+                        <img src="{{ post.content.url }}" alt="" width="550px" height="500px">
+                    {% endif %}
                     <p>{{ post.body }}</p>
-                    <p><strong>{{ post.author }}</strong> | {{ post.created_at }}</p>
+                    <p><strong>@{{ post.author }}</strong> | {{ post.created_at }}</p>
                 </div>
             </div>
         {% endfor %}

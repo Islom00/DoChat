@@ -6,6 +6,7 @@ from django.dispatch import receiver
 
 class Post(models.Model):
     title = models.CharField(max_length=255)
+    content = models.ImageField(upload_to="media/posts", null=True, blank=True)
     body = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 

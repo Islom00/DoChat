@@ -71,7 +71,7 @@ class PostDetailView(LoginRequiredMixin, View):
 
 class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    fields = ["body"]
+    fields = ["title", "content", "body"]
     template_name = "social/post_edit.html"
 
     def get_success_url(self):
