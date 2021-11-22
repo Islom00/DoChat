@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-md-5 col-sm-6">
+                <a href="{% url 'social:posts' %}" class="btn btn-secondary">Back to Feed</a>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-3">
+            <div class="col-md-5 col-sm-12 border-bottom">
+                <h1>{{ post.title }}</h1>
+                <p>{{ post.body }}</p>
+                {% if request.user == post.author %}
+                    <p><strong>{{ post.author }}</strong> | {{ post.created_at }} |
+                        <a href="{% url 'social:post-edit' post.pk %}"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'social:post-delete' post.pk %}"><i class="bi bi-trash"></i></a>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row justify-content-center mt-3 mb-5">
+            <div class="col-md-5 col-sm-12 border-bottom">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success mt-3">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% for comment in comments %}
+            <div class="row justify-content-center mt-3 mb-5">
+                <div class="col-md-5 col-sm-12 border-bottom">
+                    <p><strong>{{ comment.author }}</strong> | {{ comment.created_at }}</p>
+                    <p>{{ comment }} |
+                        {% if request.user == comment.author %}
+                            <a href="{% url 'social:comment-delete' post.pk comment.pk %}"><i
+                                    class="bi bi-trash"></i></a>
+                        {% elif request.user == post.author %}
+                            <a href="{% url 'social:comment-delete' post.pk comment.pk %}"><i
+                                    class="bi bi-trash"></i></a>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

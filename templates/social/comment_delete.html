@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-md-5 col-sm-6">
+                <a href="{% url 'social:post-detail' object.pk %}" class="btn btn-secondary">Back to Post</a>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-3 mb-5">
+            <div class="col-md-5 col-sm-12 border-bottom">
+                <form method="POST">
+                    {% csrf_token %}
+                    <h3 class="text-danger">Are you sure to delete this comment ?</h3>
+                    <h5>You are about to delete this comment !</h5>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success mt-3">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

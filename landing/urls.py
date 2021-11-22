@@ -5,5 +5,5 @@ from landing.views import Index
 app_name = "landing"
 
 urlpatterns = [
-    path("", Index.as_view(), name="index")
+    path("", Index.as_view(), name="index"),
 ]
