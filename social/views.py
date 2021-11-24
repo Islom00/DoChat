@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import UpdateView, DeleteView
 
@@ -8,19 +9,15 @@ from social.forms import PostForm, CommentForm
 from social.models import Post, Comment, UserProfile
 
 
-class PostListView(LoginRequiredMixin, View):
+class PostAddView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        posts = Post.objects.all().order_by("-created_at")
         form = PostForm()
-
         context = {
-            "posts": posts,
             "form": form,
         }
-        return render(request, "social/social.html", context)
+        return render(request, "social/add_post.html", context)
 
     def post(self, request, *args, **kwargs):
-        posts = Post.objects.all().order_by("-created_at")
         form = PostForm(request.POST)
 
         if form.is_valid():
@@ -29,9 +26,19 @@ class PostListView(LoginRequiredMixin, View):
             new_post.save()
 
         context = {
-            "posts": posts,
             "form": form,
         }
+        return render(request, "social/add_post.html", context)
+
+
+class PostListView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        posts = Post.objects.all().order_by("-created_at")
+
+        context = {
+            "posts": posts,
+        }
+
         return render(request, "social/social.html", context)
 
 
@@ -113,6 +120,8 @@ class ProfileView(View):
         posts = Post.objects.filter(author=user).order_by("-created_at")
         followers = profile.followers.all()
 
+        is_following = False
+
         if len(followers) == 0:
             is_following = False
 
@@ -164,4 +173,65 @@ class RemoveFollower(View):
 
         return redirect("social:profile", pk=profile.pk)
 
+
+class AddLike(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        post = Post.objects.get(pk=pk)
+
+        is_dislike = False
+
+        for dislike in post.dislikes.all():
+            if dislike == request.user:
+                is_dislike = True
+                break
+
+        if is_dislike:
+            post.dislikes.remove(request.user)
+
+        is_like = False
+
+        for like in post.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+
+        if not is_like:
+            post.likes.add(request.user)
+
+        if is_like:
+            post.likes.remove(request.user)
+
+        next = request.POST.get('next', '/')
+        return HttpResponseRedirect(next)
+
+
+class AddDislike(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        post = Post.objects.get(pk=pk)
+
+        is_like = False
+
+        for like in post.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+
+        if is_like:
+            post.likes.remove(request.user)
+
+        is_dislike = False
+
+        for dislike in post.dislikes.all():
+            if dislike == request.user:
+                is_dislike = True
+                break
+
+        if not is_dislike:
+            post.dislikes.add(request.user)
+
+        if is_dislike:
+            post.dislikes.remove(request.user)
+
+        next = request.POST.get('next', '/')
+        return HttpResponseRedirect(next)
 

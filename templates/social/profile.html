@@ -30,7 +30,7 @@
                     <p class="py-4"><strong>Bio:</strong> {{ profile.bio }}</p>
                 {% endif %}
                 <div class="mb-3">
-                    <p>Followers: {{ num_of_followers }}</p>
+                    <p>Followers: <i class="bi bi-people"></i> {{ num_of_followers }}</p>
                     {% if user == request.user %}
                     {% else %}
                         {% if is_following %}
@@ -54,14 +54,35 @@
             <h1 class="text-center mt-3">User's posts</h1>
         {% endif %}
         {% for post in posts %}
-            <div class="row justify-content-center mt-5">
+            <div class="row justify-content-center mt-3">
                 <div class="col-md-8 col-sm-12 border-bottom">
-                    <h1><a href="{% url 'social:post-detail' post.pk %}">{{ post.title }}</a></h1>
+                    <h1>{{ post.title }}</h1>
                     {% if post.content %}
-                        <img src="{{ post.content.url }}" alt="" width="550px" height="500px">
+                        <img class="mb-2" src="{{ post.content.url }}" alt="" width="850px" height="700px">
                     {% endif %}
                     <p>{{ post.body }}</p>
-                    <p><strong>@{{ post.author }}</strong> | {{ post.created_at }}</p>
+                    <div class="d-flex flex-row">
+                        <form method="GET" action="{% url 'social:post-detail' post.pk %}">
+                            {% csrf_token %}
+                            <button style="background-color: transparent; border: none; box-shadow: none" type="submit">
+                                <i class="bi bi-chat"></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'social:post-like' post.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button style="background-color: transparent; border: none; box-shadow: none" type="submit">
+                                <i class="bi bi-hand-thumbs-up"><span>{{ post.likes.all.count }}</span></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'social:post-dislike' post.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button style="background-color: transparent; border: none; box-shadow: none" type="submit">
+                                <i class="bi bi-hand-thumbs-down"><span>{{ post.dislikes.all.count }}</span></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         {% endfor %}

@@ -3,25 +3,9 @@
 
 {% block content %}
     <div class="container">
-        <div class="row justify-content-center mt-3">
-            <div class="col-md-5 col-sm-12 border-bottom">
-                <h3 class="text-center">Add a post !</h3>
-            </div>
-        </div>
         <div class="row justify-content-center mt-3 mb-5">
             <div class="col-md-5 col-sm-12 border-bottom">
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-success mt-3">Submit</button>
-                    </div>
-                </form>
-
-            </div>
-        </div>
-        <div class="row justify-content-center mt-3 mb-5">
-            <div class="col-md-5 col-sm-12 border-bottom">
+                <h1 class="text-center bg-light"><a href="{% url 'social:add-post' %}"><i class="bi bi-plus-square"></i></a></h1>
                 <h1 class="text-center bg-secondary">All Posts</h1>
             </div>
         </div>
@@ -30,10 +14,31 @@
                     <div class="col-md-5 col-sm-12 border-bottom">
                         <h1>{{ post.title }}</h1>
                         {% if post.content %}
-                            <img src="{{ post.content.url }}" alt="" width="550px" height="500px">
+                            <img class="mb-2" src="{{ post.content.url }}" alt="" width="550px" height="500px">
                         {% endif %}
-                        <a href="{% url 'social:post-detail' post.pk %}"><i class="bi bi-chat-dots-fill"></i></a>
                         <p>{{ post.body }}</p>
+                    <div class="d-flex flex-row">
+                        <form method="GET" action="{% url 'social:post-detail' post.pk %}">
+                            {% csrf_token %}
+                            <button style="background-color: transparent; border: none; box-shadow: none" type="submit">
+                                <i class="bi bi-chat"></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'social:post-like' post.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button style="background-color: transparent; border: none; box-shadow: none" type="submit">
+                                <i class="bi bi-hand-thumbs-up"><span>{{ post.likes.all.count }}</span></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'social:post-dislike' post.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button style="background-color: transparent; border: none; box-shadow: none" type="submit">
+                               <i class="bi bi-hand-thumbs-down"><span>{{ post.dislikes.all.count }}</span></i>
+                            </button>
+                        </form>
+                    </div>
                         <p><strong>by: <a
                                 href="{% url 'social:profile' post.author.profile.pk %}">@{{ post.author }}</a></strong>
                             | {{ post.created_at }}</p>

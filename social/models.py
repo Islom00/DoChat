@@ -9,6 +9,8 @@ class Post(models.Model):
     content = models.ImageField(upload_to="media/posts", null=True, blank=True)
     body = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    likes = models.ManyToManyField(User, blank=True, related_name="likes")
+    dislikes = models.ManyToManyField(User, blank=True, related_name="dislikes")
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -43,6 +45,9 @@ class UserProfile(models.Model):
         default="media/profile_pictures/default.png",
         blank=True)
     followers = models.ManyToManyField(User, blank=True, related_name="followers")
+
+    def __str__(self):
+        return self.name
 
 
 @receiver(post_save, sender=User)
