@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+    <div class="row mt-5">
+            <div class="col-md-3 col-sm-6">
+                <a class="btn btn-secondary" href="{% url 'social:posts' %}">Back To Feed</a>
+            </div>
+        </div>
+        {% for profile in profile_list %}
+            <div class="row justify-content-center mt-3">
+                <div class="col-md-5 col-sm-12 border-bottom position-relative">
+                    <img src="{{ profile.avatar.url }}" alt="" class="rounded-circle" width="100" height="100">
+                    <h1>User: <a href="{% url 'social:profile' profile.user.pk %}">@{{ profile.user }}</a></h1>
+                    <h1>Location: {{ profile.location }}</h1>
+                    <h1>Followers: {{ profile.followers.count }}</h1>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

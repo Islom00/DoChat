@@ -17,13 +17,14 @@
                     <a class="nav-link active" aria-current="page" href="#">Home</a>
                 </li>
             </ul>
-            <form class="d-flex">
+            <form method="GET" action="{% url 'social:profile-search' %}" class="d-flex">
+                {% csrf_token %}
                 <div class="input-group">
                     <span class="input-group-text" id="basic-addon1">@</span>
-                    <input type="text" class="form-control" placeholder="Username" aria-label="Username"
+                    <input name="query" value="{{ request.GET.query }}" type="text" class="form-control" placeholder="Username" aria-label="Username"
                            aria-describedby="basic-addon1">
                 </div>
-                <button class="btn btn-outline-light" type="submit">Search</button>
+                <button class="btn btn-outline-dark" type="submit"><i class="bi bi-search"></i></button>
             </form>
             {% if user.is_authenticated %}
                 <ul style="list-style-type: none">

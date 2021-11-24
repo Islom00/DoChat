@@ -1,9 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import UpdateView, DeleteView
+from django.views.generic import UpdateView, DeleteView, ListView
 
 from social.forms import PostForm, CommentForm
 from social.models import Post, Comment, UserProfile
@@ -33,7 +34,10 @@ class PostAddView(LoginRequiredMixin, View):
 
 class PostListView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        posts = Post.objects.all().order_by("-created_at")
+        logged_in_user = request.user
+        posts = Post.objects.filter(
+            author__profile__followers__in=[logged_in_user.id]
+        ).order_by("-created_at")
 
         context = {
             "posts": posts,
@@ -146,7 +150,7 @@ class ProfileView(View):
 
 class ProfileEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = UserProfile
-    fields = ["avatar", "name", "birth_date", "bio"]
+    fields = ["avatar", "name", "birth_date", "bio", "location"]
     template_name = "social/profile_edit.html"
 
     def get_success_url(self):
@@ -235,3 +239,27 @@ class AddDislike(LoginRequiredMixin, View):
         next = request.POST.get('next', '/')
         return HttpResponseRedirect(next)
 
+
+class UserSearchListView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        query = self.request.GET.get("query")
+        profile_list = UserProfile.objects.filter(Q(
+            user__username__icontains=query
+        ))
+        context = {
+            "profile_list": profile_list
+        }
+
+        return render(request, "social/user_found.html", context)
+
+
+class UserFollowersListView(View):
+    def get(self, request, pk, *args, **kwargs):
+        profile = UserProfile.objects.get(pk=pk)
+        profile_followers = profile.followers.all()
+
+        context = {
+            "profile_followers": profile_followers,
+        }
+
+        return render(request, "social/view_followers.html", context)

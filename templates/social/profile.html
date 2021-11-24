@@ -30,7 +30,7 @@
                     <p class="py-4"><strong>Bio:</strong> {{ profile.bio }}</p>
                 {% endif %}
                 <div class="mb-3">
-                    <p>Followers: <i class="bi bi-people"></i> {{ num_of_followers }}</p>
+                    <p>Followers: <a href="{% url 'social:user-followers' profile.user.pk %}"><i class="bi bi-people"></i> {{ num_of_followers }}</a></p>
                     {% if user == request.user %}
                     {% else %}
                         {% if is_following %}
@@ -64,21 +64,21 @@
                     <div class="d-flex flex-row">
                         <form method="GET" action="{% url 'social:post-detail' post.pk %}">
                             {% csrf_token %}
-                            <button style="background-color: transparent; border: none; box-shadow: none" type="submit">
+                            <button class="remove-default-btn" type="submit">
                                 <i class="bi bi-chat"></i>
                             </button>
                         </form>
                         <form method="POST" action="{% url 'social:post-like' post.pk %}">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.path }}">
-                            <button style="background-color: transparent; border: none; box-shadow: none" type="submit">
+                            <button  class="remove-default-btn" type="submit">
                                 <i class="bi bi-hand-thumbs-up"><span>{{ post.likes.all.count }}</span></i>
                             </button>
                         </form>
                         <form method="POST" action="{% url 'social:post-dislike' post.pk %}">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.path }}">
-                            <button style="background-color: transparent; border: none; box-shadow: none" type="submit">
+                            <button class="remove-default-btn" type="submit">
                                 <i class="bi bi-hand-thumbs-down"><span>{{ post.dislikes.all.count }}</span></i>
                             </button>
                         </form>

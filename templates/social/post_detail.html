@@ -22,11 +22,15 @@
                 {% endif %}
             </div>
         </div>
-    <h1 class="text-center mb-3">Comments</h1>
+        <h1 class="text-center mb-3">Comments</h1>
         {% for comment in comments %}
             <div class="row justify-content-center mt-3 mb-5">
                 <div class="col-md-5 col-sm-12 border-bottom">
-                    <p><strong>{{ comment.author }}</strong> | {{ comment.created_at }}</p>
+                    <a href="{% url 'social:profile' post.author.profile.pk %}">
+                        <img class="round-circle post-img" src="{{ post.author.profile.avatar.url }}" alt="" width="30"
+                             height="30">
+                    </a>
+                    <p class="post-text">@{{ comment.author }} | {{ comment.created_at }}</p>
                     <p>{{ comment }} |
                         {% if request.user == comment.author %}
                             <a href="{% url 'social:comment-delete' post.pk comment.pk %}"><i
