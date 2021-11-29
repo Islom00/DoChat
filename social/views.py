@@ -1,13 +1,14 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import UpdateView, DeleteView, ListView
+from django.views.generic import UpdateView, DeleteView
 
-from social.forms import PostForm, CommentForm
-from social.models import Post, Comment, UserProfile
+from social.forms import PostForm, CommentForm, ThreadForm, MessageForm
+from social.models import Post, Comment, UserProfile, ThreadModel, MessageModel
 
 
 class PostAddView(LoginRequiredMixin, View):
@@ -19,7 +20,7 @@ class PostAddView(LoginRequiredMixin, View):
         return render(request, "social/add_post.html", context)
 
     def post(self, request, *args, **kwargs):
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
 
         if form.is_valid():
             new_post = form.save(commit=False)
@@ -178,7 +179,7 @@ class RemoveFollower(View):
         return redirect("social:profile", pk=profile.pk)
 
 
-class AddLike(LoginRequiredMixin, View):
+class PostLike(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
         post = Post.objects.get(pk=pk)
 
@@ -205,11 +206,11 @@ class AddLike(LoginRequiredMixin, View):
         if is_like:
             post.likes.remove(request.user)
 
-        next = request.POST.get('next', '/')
-        return HttpResponseRedirect(next)
+        next_url = request.POST.get('next', '/')
+        return HttpResponseRedirect(next_url)
 
 
-class AddDislike(LoginRequiredMixin, View):
+class PostDislike(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
         post = Post.objects.get(pk=pk)
 
@@ -236,11 +237,11 @@ class AddDislike(LoginRequiredMixin, View):
         if is_dislike:
             post.dislikes.remove(request.user)
 
-        next = request.POST.get('next', '/')
-        return HttpResponseRedirect(next)
+        next_url = request.POST.get('next', '/')
+        return HttpResponseRedirect(next_url)
 
 
-class UserSearchListView(LoginRequiredMixin, View):
+class UserSearch(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         query = self.request.GET.get("query")
         profile_list = UserProfile.objects.filter(Q(
@@ -253,13 +254,165 @@ class UserSearchListView(LoginRequiredMixin, View):
         return render(request, "social/user_found.html", context)
 
 
-class UserFollowersListView(View):
+class UserFollowersList(View):
     def get(self, request, pk, *args, **kwargs):
         profile = UserProfile.objects.get(pk=pk)
         profile_followers = profile.followers.all()
 
         context = {
+            "profile": profile,
             "profile_followers": profile_followers,
         }
 
         return render(request, "social/view_followers.html", context)
+
+
+class CommentLike(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        comment = Comment.objects.get(pk=pk)
+
+        is_dislike = False
+
+        for dislike in comment.dislikes.all():
+            if dislike == request.user:
+                is_dislike = True
+                break
+
+        if is_dislike:
+            comment.dislikes.remove(request.user)
+
+        is_like = False
+
+        for like in comment.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+
+        if not is_like:
+            comment.likes.add(request.user)
+
+        if is_like:
+            comment.likes.remove(request.user)
+
+        next_url = request.POST.get('next', '/')
+        return HttpResponseRedirect(next_url)
+
+
+class CommentDislike(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        comment = Comment.objects.get(pk=pk)
+
+        is_like = False
+
+        for like in comment.likes.all():
+            if like == request.user:
+                is_like = True
+                break
+
+        if is_like:
+            comment.likes.remove(request.user)
+
+        is_dislike = False
+
+        for dislike in comment.dislikes.all():
+            if dislike == request.user:
+                is_dislike = True
+                break
+
+        if not is_dislike:
+            comment.dislikes.add(request.user)
+
+        if is_dislike:
+            comment.dislikes.remove(request.user)
+
+        next_url = request.POST.get('next', '/')
+
+        return HttpResponseRedirect(next_url)
+
+
+class CommentReply(LoginRequiredMixin, View):
+    def post(self, request, post_pk, pk, *args, **kwargs):
+        post = Post.objects.get(pk=post_pk)
+        parent_comment = Comment.objects.get(pk=pk)
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            new_comment = form.save(commit=False)
+            new_comment.author = request.user
+            new_comment.post = post
+            new_comment.parent = parent_comment
+            new_comment.save()
+
+        return redirect("social:post-detail", pk=post_pk)
+
+
+class ListThreads(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        threads = ThreadModel.objects.filter(Q(user=request.user) | Q(receiver=request.user))
+
+        context = {
+            "threads": threads
+        }
+        return render(request, "social/inbox.html", context)
+
+
+class CreateThreadView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        form = ThreadForm()
+
+        context = {
+            "form": form
+        }
+        return render(request, "social/create_thread.html", context)
+
+    def post(self, request, *args, **kwargs):
+        form = ThreadForm(request.POST)
+        username = request.POST.get("username")
+        try:
+            receiver = User.objects.get(username=username)
+            if ThreadModel.objects.filter(user=request.user, receiver=receiver).exists():
+                thread = ThreadModel.objects.filter(user=request.user, receiver=receiver)[0]
+                return redirect("social:thread", pk=thread.pk)
+            elif ThreadModel.objects.filter(user=receiver, receiver=request.user).exists():
+                thread = ThreadModel.objects.filter(user=receiver, receiver=request.user)[0]
+                return redirect("social:thread", pk=thread.pk)
+            if form.is_valid():
+                thread = ThreadModel(user=request.user, receiver=receiver)
+                thread.save()
+                return redirect("social:thread", pk=thread.pk)
+        except:
+            return redirect("social:create-thread")
+
+
+class ThreadView(LoginRequiredMixin, View):
+    def get(self, request, pk, *args, **kwargs):
+        form = MessageForm()
+        thread = ThreadModel.objects.get(pk=pk)
+        message_list = MessageModel.objects.filter(thread__pk__contains=pk)
+
+        context = {
+            "thread": thread,
+            "form": form,
+            "message_list": message_list,
+        }
+        return render(request, "social/thread.html", context)
+
+
+class CreateMessage(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        thread = ThreadModel.objects.get(pk=pk)
+        if thread.receiver == request.user:
+            receiver = thread.user
+        else:
+            receiver = thread.receiver
+
+        message = MessageModel(
+            thread=thread,
+            send_user=request.user,
+            receiver_user=receiver,
+            body=request.POST.get("message")
+        )
+
+        message.save()
+        return redirect("social:thread", pk=pk)
+

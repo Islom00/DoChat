@@ -13,10 +13,10 @@
         </div>
         {% for post in posts %}
             <div class="row justify-content-center mt-3">
-                <div class="col-md-5 col-sm-12 border-bottom">
+                <div class="col-md-5 col-sm-12 border-bottom position-relative">
                     <h1>{{ post.title }}</h1>
                     {% if post.content %}
-                        <img class="mb-2" src="{{ post.content.url }}" alt="" width="550px" height="500px">
+                        <img class="mb-2 post-img" src="{{ post.content.url }}" alt="" width="550px" height="500px">
                     {% endif %}
                     <p>{{ post.body }}</p>
                     <div class="d-flex flex-row mb-2">
@@ -42,7 +42,7 @@
                         </form>
                     </div>
                     <a href="{% url 'social:profile' post.author.profile.pk %}">
-                        <img class="round-circle post-img" src="{{ post.author.profile.avatar.url }}" alt="" width="30" height="30">
+                        <img class="rounded-circle post-img" src="{{ post.author.profile.avatar.url }}" alt="" width="30" height="30">
                     </a>
                     <p class="post-text">
                         <a

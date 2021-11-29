@@ -8,7 +8,7 @@
         </div>
         <div class="row justify-content-center mt-3 mb-5">
             <div class="col-md-5 col-sm-12 border-bottom">
-                <form method="POST" enctype="multipart/form-data">
+                <form action="{% url 'social:add-post' %}" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form|crispy }}
                     <div class="d-grid gap-2">

@@ -4,7 +4,7 @@
     <div class="container">
         <div class="row mt-5">
             <div class="col-md-3 col-sm-6">
-                <a class="btn btn-secondary" href="{% url 'social:posts' %}">Back To Feed</a>
+                <a class="btn btn-secondary" href="{% url 'social:profile' profile.pk   %}">Back To Profile</a>
             </div>
         </div>
         <h1 class="text-center mt-3">User's followers</h1>
@@ -12,7 +12,7 @@
             <div class="card shadow-sm col-md-8 col-sm-12 border-bottom px-5 pt-3">
                 {% for follower in profile_followers %}
                     <img class="post-img rounded-circle" src="{{ follower.profile.avatar.url }}" alt="" width="100" height="100">
-                  <h3>@{{ follower.profile.name }}</h3>
+                  <h3><a href="{% url 'social:profile' follower.profile.pk %}">@{{ follower.profile.name }}</a></h3>
                 {% endfor %}
             </div>
         </div>
