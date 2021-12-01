@@ -5,27 +5,28 @@
         <div class="row">
             <div class="col-md-12 p-5">
                 <h3>Your conversations</h3>
-
+                {% for thread in threads.all %}
+                    <div class="row mb-3 mt-5">
+                        <div class="card col-md-12 p-5 shadow-sm">
+                            <h5>
+                                <i class="bi bi-envelope"></i> {{ thread.user }} - {{ thread.receiver }}
+                            </h5>
+                            <a class="stretched-link" href="{% url 'social:thread' thread.pk %}"></a>
+                        </div>
+                    </div>
+                    <a
+                            href="{% url 'social:thread-delete' thread.pk %}"><i class="bi bi-trash"></i></a>
+                {% endfor %}
             </div>
         </div>
-    <div class="row">
-        <div class="col-md-12 p-5">
-            <form method="GET" action="{% url 'social:create-thread' %}">
-                <button class="btn btn-light p-3" type="submit">
-                    Start a conversation
-                </button>
-            </form>
+        <div class="row">
+            <div class="col-md-12 p-5">
+                <form method="GET" action="{% url 'social:create-thread' %}">
+                    <button class="btn btn-light p-3" type="submit">
+                        Start a conversation
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
- </div>
-    {% for thread in threads.all %}
-        <div class="row mb-3">
-            <div class="card col-md-12 p-5 shadow-sm">
-                <h5>
-                    {{ thread.user }} - {{ thread.receiver }}
-                </h5>
-                <a class="stretched-link" href="{% url 'social:thread' thread.pk %}"></a>
-            </div>
-        </div>
-    {% endfor %}
 {% endblock %}

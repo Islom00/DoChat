@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
 from django.views.generic import UpdateView, DeleteView
 
@@ -381,6 +383,7 @@ class CreateThreadView(LoginRequiredMixin, View):
                 thread.save()
                 return redirect("social:thread", pk=thread.pk)
         except:
+            messages.error(request, "Invalid username !")
             return redirect("social:create-thread")
 
 
@@ -416,3 +419,12 @@ class CreateMessage(LoginRequiredMixin, View):
         message.save()
         return redirect("social:thread", pk=pk)
 
+
+class ThreadDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = ThreadModel
+    template_name = "social/inbox.html"
+    success_url = reverse_lazy("social:thread")
+
+    def test_func(self):
+        thread = self.get_object()
+        return self.request.user == thread.receiver or self.request == thread.user

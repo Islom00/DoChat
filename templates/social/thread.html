@@ -2,8 +2,7 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-    <div class="container">
+    <div style="background-color: lightskyblue" class="container mt-5">
         <div class="row">
             <div class="card col-md-12 p-3 mt-5 shadow-sm">
                 {% if thread.receiver == request.user %}
@@ -26,13 +25,31 @@
             <div class="row">
                 <div class="col-md-12 my-1">
                     {% if message.send_user == request.user %}
-                        <div class="sent-message my-3">
+                        {% if message.image %}
+                            <div>
+                                <img class="message-image" src="{{ message.image.url }}" alt="">
+                            </div>
+                        {% endif %}
+                        <div class="received-message my-3">
+                            <img class="rounded-circle" src="{{ message.send_user.profile.avatar.url }}" alt=""
+                                 height="20%" width="20%">
                             <p>{{ message.body }}</p>
+                            {{ message.date|time }}
                         </div>
                         </div>
                     {% elif message.receiver_user == request.user %}
-                        <div class="received-message my-3">
+                        <div class="col-md-12 offset-6">
+                            {% if message.image %}
+                                <div>
+                                    <img class="message-image" src="{{ message.image.url }}" alt="">
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="sent-message my-3">
+                            <img class="rounded-circle" src="{{ message.send_user.profile.avatar.url }}" alt=""
+                                 width="20%" height="20%">
                             <p>{{ message.body }}</p>
+                            {{ message.date|time }}
                         </div>
                     {% endif %}
             </div>

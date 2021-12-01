@@ -3,7 +3,7 @@ from django.urls import path
 from social.views import PostListView, PostDetailView, PostEditView, PostDeleteView, CommentDeleteView, ProfileView, \
     ProfileEditView, AddFollower, RemoveFollower, PostAddView, UserSearch, \
     UserFollowersList, PostLike, PostDislike, CommentLike, CommentDislike, CommentReply, ListThreads, CreateThreadView, \
-    ThreadView, CreateMessage
+    ThreadView, CreateMessage, ThreadDeleteView
 
 app_name = "social"
 
@@ -27,6 +27,7 @@ urlpatterns = [
     path("profile/<int:pk>/followers", UserFollowersList.as_view(), name="user-followers"),
     path("inbox/", ListThreads.as_view(), name="inbox"),
     path("inbox/create-thread", CreateThreadView.as_view(), name="create-thread"),
+    path("inbox/<int:pk>/delete-thread", ThreadDeleteView.as_view(), name="thread-delete"),
     path("inbox/<int:pk>/", ThreadView.as_view(), name="thread"),
     path("inbox/<int:pk>/create-message", CreateMessage.as_view(), name="create-message"),
 ]
