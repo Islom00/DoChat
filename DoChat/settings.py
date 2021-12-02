@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     ############################
     'social',
     'landing',
+    'accounts',
     ############################
     'allauth',
     'allauth.account',
@@ -92,14 +93,11 @@ WSGI_APPLICATION = 'DoChat.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql.psycopg2',
-        'NAME':  "postgres",
-        'USER':  "postgres",
-        'PASSWORD':  "postgres",
-        'HOST':  "localhost",
-        'PORT':  "5432",
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -153,8 +151,3 @@ ACCOUNT_EMAIL_REQUIRED = True
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-try:
-    from .local_settings import *
-except ImportError:
-    pass
-

@@ -68,7 +68,7 @@
                                 <img class="card-img-top" src="{{ post.content.url }}" alt="Card image cap">
                             {% endif %}
                             <div class="card-body bg-custom-light">
-                                <h3 class="card-title">{{ post.title }}</h3>
+                                <h3 class="card-title"><a href="{% url 'social:post-detail' post.pk %}">{{ post.title }}</a></h3>
                                 <p class="card-text">{{ post.body }}</p>
                                 {% if request.user == post.author %}
                                 <a href="{% url 'social:post-delete' post.pk %}"><i class="bi bi-trash"></i></a>
