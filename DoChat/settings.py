@@ -148,7 +148,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = BASE_DIR / "static",
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
 django_heroku.settings(locals())
 
 MEDIA_URL = "/media/"

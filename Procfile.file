@@ -1,4 +1,4 @@
 release: python manage.py migrate
-web: gunicorn DoChat.wsgi --log-file=-
+web: gunicorn DoChat.wsgi --log-file -
 
 
