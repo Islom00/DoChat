@@ -9,8 +9,8 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import UpdateView, DeleteView
 
-from social.forms import PostForm, CommentForm, ThreadForm, MessageForm
-from social.models import Post, Comment, UserProfile, ThreadModel, MessageModel
+from social.forms import PostForm, CommentForm
+from social.models import Post, Comment, UserProfile
 
 
 class PostAddView(LoginRequiredMixin, View):
@@ -346,85 +346,3 @@ class CommentReply(LoginRequiredMixin, View):
             new_comment.save()
 
         return redirect("social:post-detail", pk=post_pk)
-
-
-class ListThreads(LoginRequiredMixin, View):
-    def get(self, request, *args, **kwargs):
-        threads = ThreadModel.objects.filter(Q(user=request.user) | Q(receiver=request.user))
-
-        context = {
-            "threads": threads
-        }
-        return render(request, "social/inbox.html", context)
-
-
-class CreateThreadView(LoginRequiredMixin, View):
-    def get(self, request, *args, **kwargs):
-        form = ThreadForm()
-
-        context = {
-            "form": form
-        }
-        return render(request, "social/create_thread.html", context)
-
-    def post(self, request, *args, **kwargs):
-        form = ThreadForm(request.POST)
-        username = request.POST.get("username")
-        try:
-            receiver = User.objects.get(username=username)
-            if ThreadModel.objects.filter(user=request.user, receiver=receiver).exists():
-                thread = ThreadModel.objects.filter(user=request.user, receiver=receiver)[0]
-                return redirect("social:thread", pk=thread.pk)
-            elif ThreadModel.objects.filter(user=receiver, receiver=request.user).exists():
-                thread = ThreadModel.objects.filter(user=receiver, receiver=request.user)[0]
-                return redirect("social:thread", pk=thread.pk)
-            if form.is_valid():
-                thread = ThreadModel(user=request.user, receiver=receiver)
-                thread.save()
-                return redirect("social:thread", pk=thread.pk)
-        except:
-            messages.error(request, "Invalid username !")
-            return redirect("social:create-thread")
-
-
-class ThreadView(LoginRequiredMixin, View):
-    def get(self, request, pk, *args, **kwargs):
-        form = MessageForm()
-        thread = ThreadModel.objects.get(pk=pk)
-        message_list = MessageModel.objects.filter(thread__pk__contains=pk)
-
-        context = {
-            "thread": thread,
-            "form": form,
-            "message_list": message_list,
-        }
-        return render(request, "social/thread.html", context)
-
-
-class CreateMessage(LoginRequiredMixin, View):
-    def post(self, request, pk, *args, **kwargs):
-        thread = ThreadModel.objects.get(pk=pk)
-        if thread.receiver == request.user:
-            receiver = thread.user
-        else:
-            receiver = thread.receiver
-
-        message = MessageModel(
-            thread=thread,
-            send_user=request.user,
-            receiver_user=receiver,
-            body=request.POST.get("message")
-        )
-
-        message.save()
-        return redirect("social:thread", pk=pk)
-
-
-class ThreadDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model = ThreadModel
-    template_name = "social/inbox.html"
-    success_url = reverse_lazy("social:thread")
-
-    def test_func(self):
-        thread = self.get_object()
-        return self.request.user == thread.receiver or self.request == thread.user

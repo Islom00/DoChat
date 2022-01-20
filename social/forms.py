@@ -1,6 +1,6 @@
 from django import forms
 
-from social.models import Post, Comment, ThreadModel, MessageModel
+from social.models import Post, Comment
 
 
 class PostForm(forms.ModelForm):
@@ -32,15 +32,3 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ["comment"]
-
-
-class ThreadForm(forms.Form):
-    username = forms.CharField(label="", max_length=100)
-
-
-class MessageForm(forms.ModelForm):
-    message = forms.CharField(label="", max_length=1000)
-
-    class Meta:
-        model = MessageModel
-        fields = ["message"]
